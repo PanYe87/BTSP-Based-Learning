@@ -1,38 +1,27 @@
 function FR_sim_Ring(load_file, I0, w0, w_max, save_file, include_noise, sigma, w1_range) 
 
-    load(load_file, "P", "D", "M", "s", "phase", "n_ca3_per_track", "Env_track")
-    
-    n = size(Env_track, 2);
-    % modification
-    %{
-    n_ca3_per_track = n_ca3_per_track * 2;
-    phase_dist = 2 * pi / n_ca3_per_track;              % only a part of net is active during learning
-    phase = -pi + phase_dist/2 : phase_dist : pi;       % differnt to the paper, we use -pi to pi 
-    phase = phase';  
-    %}
-    
-    
+    load(load_file, "P", "D", "M", "s", "phase", "N", "n")
+
     % setup
     [tau, d_t, err, check_dynamic, plot_mean, activation_all, tracker, max_step] = FR_sim_setup();
     
     % set simulation range
     if nargin < 7
         sigma = 0;
-        w1_range = [2, 12];
+        w1_range = [1, 12];
     elseif nargin < 8
-        w1_range = [2, 12];
+        w1_range = [1, 12];
     end
     
     
     % seed to makes sure to have same intial condition for each one.
     rng(20221213)
 
-    Env_track_ring = repmat((1:n_ca3_per_track)', 1, n);   % create the coding of environment that are all same.
+    Env_track_ring = repmat((1:N)', 1, n);   % create the coding of environment that are all same.
     
     phase_ring = unique(phase);
     M_ring = 1; s_ring = 1; eta = 1; eta_IC = 1;                            % thoses variables should be set to 1-
     
-
     f = @(x, y, k, Sparsity) 2*x*y./(x+y)*(1-Sparsity^2*(x+y)).^k;          % amplitude equation
     
     eta_max = 1000;
@@ -75,10 +64,10 @@ function FR_sim_Ring(load_file, I0, w0, w_max, save_file, include_noise, sigma, 
         end
         
         % initial condition
-        FR_init_ring = zeros(n_ca3_per_track , 1);
+        FR_init_ring = zeros(N , 1);
         FR_init_ring = FR_init_ring + (1 + cos(phase_ring)) * r_base;
         
-        FR_result_aux = zeros(length(loop_set_step), n_ca3_per_track);
+        FR_result_aux = zeros(length(loop_set_step), N);
        
         for i = 1:length(loop_set_step)    
             % define the connectivity matrix for the ring model simulation
@@ -97,7 +86,7 @@ function FR_sim_Ring(load_file, I0, w0, w_max, save_file, include_noise, sigma, 
             end
             
             
-            [final_Evn, ~, ~, n_step] = FR_simulation(n_ca3_per_track, M_ring, s_ring, Env_track_ring, phase_ring, weights_ring, ...
+            [final_Evn, ~, ~, n_step] = FR_simulation(N, M_ring, s_ring, Env_track_ring, phase_ring, weights_ring, ...
                     eta, eta_IC, I0, d_t, tau, err, check_dynamic, plot_mean, FR_init_ring, max_step, activation_all, tracker);
             
             fileID = fopen("Files\weight_matrix\Log_ring.txt",'a+');
@@ -117,7 +106,7 @@ function FR_sim_Ring(load_file, I0, w0, w_max, save_file, include_noise, sigma, 
     end        
 
     phase = phase_ring;
-    save(save_file, "FR_results", "n_ca3_per_track", "etas_seq", "w1s", "w0", "I0", "include_noise", "w_max", "P", "D", "M", "s", "phase")
+    save(save_file, "FR_results", "N", "etas_seq", "w1s", "w0", "I0", "include_noise", "w_max", "P", "D", "M", "s", "phase")
 end
 
 function [tau, d_t, err, check_dynamic, plot_mean, activation_all, tracker, max_step] = FR_sim_setup()

@@ -1,6 +1,6 @@
 function FR_sim_Network(load_file, I0, w0, w_max, save_file, w1_range)
     
-    load(load_file, "P", "D", "M", "s", "Env_track", "final_weight", "phase", "n_ca3_per_track")
+    load(load_file, "P", "D", "M", "s", "Env_track", "final_weight", "phase", "N")
             % load the weight matrix and necesarry inf
     [tau, d_t, err, check_dynamic, plot_mean, activation_all, tracker, max_step] = FR_sim_setup(); 
             % load the inf for FR sim
@@ -50,8 +50,8 @@ function FR_sim_Network(load_file, I0, w0, w_max, save_file, w1_range)
         
         
         % Auxiliar variable to save resulting firing rate in each
-        FR_result_aux = zeros(length(etas), n_ca3_per_track * M * s);
-        FR_total_aux = zeros(length(etas), n_ca3_per_track * M);
+        FR_result_aux = zeros(length(etas), N * M * s);
+        FR_total_aux = zeros(length(etas), N * M);
         
         % run simulation for each eta 
         for i = 1:length(etas)       
@@ -60,13 +60,13 @@ function FR_sim_Network(load_file, I0, w0, w_max, save_file, w1_range)
            
             % set initial condition. Different for each eta
             ind_evn = Env_track(:, end - eta);                              % the cell indexs for simulated environment
-            FR_init_network = zeros(n_ca3_per_track * M, 1);                
+            FR_init_network = zeros(N * M, 1);                
             FR_init_network(ind_evn) = FR_init_network(ind_evn) + (1 + cos(phase)) * r_base;    
                             % bumpy initial condition and its magnitude
                             % depends on the step.
             
             % check_dynamic = true;
-            [final_Evn, ~, FR_total_ind, n_step] = FR_simulation(n_ca3_per_track, M, s, Env_track, phase, weights_network, ...
+            [final_Evn, ~, FR_total_ind, n_step] = FR_simulation(N, M, s, Env_track, phase, weights_network, ...
                 eta, eta_IC, I0, d_t, tau, err, check_dynamic, plot_mean, FR_init_network, max_step, activation_all, tracker);
             
             
@@ -84,7 +84,7 @@ function FR_sim_Network(load_file, I0, w0, w_max, save_file, w1_range)
     
     weights_network = [];
     include_noise = nan;
-    save(save_file, "FR_results", "FR_total", "n_ca3_per_track", "etas_seq", "w1s", "w0", "I0", "include_noise", "w_max", "P", "D", "M", "s","phase")
+    save(save_file, "FR_results", "FR_total", "N", "etas_seq", "w1s", "w0", "I0", "include_noise", "w_max", "P", "D", "M", "s","phase")
 end
 
 function [tau, d_t, err, check_dynamic, plot_mean, activation_all, tracker, max_step] = FR_sim_setup()

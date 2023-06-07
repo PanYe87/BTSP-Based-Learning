@@ -64,8 +64,13 @@ w_max: w1 after the rescalling the weight matrix
        C = C/(M*s);
     end
     
-    Mean = amp * cos(phase) + w_mean;
-    V = A + B * cos(phase) + C * (cos(phase)) .^ 2;
+    if length(eta) > 1
+        Mean = 0;
+        V = 0;
+    else
+        Mean = amp * cos(phase) + w_mean;
+        V = A + B * cos(phase) + C * (cos(phase)) .^ 2;
+    end
       
     function [F, F_2, w_m, w_2] = extra_values()
         F = 1 - s.^2 * (P+D);
