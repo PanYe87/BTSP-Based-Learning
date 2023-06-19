@@ -25,7 +25,7 @@ https://ieeexplore.ieee.org/document/7217164
         elseif velocity == 35
             param_P = [2, 0.6, 1.42, -1.625]; 
             param_D = [3, 1.54, 3.85, -5.75]; 
-        elseif velocity == 20
+        else %if velocity == 20
             param_P = [5, 0.75, 1.825, -1.55]; 
             param_D = [5, 1.875, 3.45, -4.55]; 
         end

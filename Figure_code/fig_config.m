@@ -17,4 +17,5 @@ function fig_config(allsize)
         ax.Legend.FontName = "Arial";
         ax.Legend.FontSize = legend_size;
     end
+    xtickangle(0)
 end

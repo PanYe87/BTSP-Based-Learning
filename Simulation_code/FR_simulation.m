@@ -74,7 +74,6 @@ max_step: max step to stop the simulation, avoid the endless simulation
     
     FR = FR_init;
     
-    figure
     cont = true;
     while cont
         res = update_FR(); % update the FR
