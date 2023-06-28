@@ -7,4 +7,4 @@ Folders:
 - Figure_code: codes to generate figures in the article.
 - Figure: contains generated figure and inkscape files.
 - Simulated_Data: folder to store simulated data. This folder is not updated.
-- Simulation_code: code to generate simulated data to make plots.
+- Simulation_code: code to generate simulated data to make plots. (IMPORTANT: run 0_Simulations.mlx script first to generate data.)
