@@ -1,6 +1,6 @@
 function [L, n_ca3, ca3_peak_locations, dt, plateau_duration] = Exp_setup(L, n_ca3)
 
-    dt = 10;
+    dt = 10 / 1000;
     % length of track;  number of input ca3;   time step in ms
     
     plateau_duration = 300; 

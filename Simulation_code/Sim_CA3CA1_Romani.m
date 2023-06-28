@@ -1,47 +1,54 @@
-function [synaptic_weight, list_pot, list_dep, ca3_peak_locations] = Sim_CA3CA1_Romani(velocity, inductions, init_weight, L, n_ca3)
+function [synaptic_weight, list_pot, list_dep, ca3_peak_locations] = Sim_CA3CA1_Romani(velocity, inductions, init_weight, L, n_ca3, param)
     % get the basic setup parameter as length of track, number of CA3, peak
     % positions, time step, duration of the plateau
-    if nargin < 4
+      if nargin < 4
         L = 187;
-        n_ca3 = 100;
-    elseif nargin < 5
+    end
+
+    if nargin < 5
         n_ca3 = 100;
     end
+
+    if nargin < 6
+        param = [1.664103 * 1000   / 1000, (4.370065E-1 * 1000 + 300) / 1000, ...
+            4.150117E-01, 2/(4.541096E-01 +0.1), 2.618154E-02, 2/(9.977173E-02 +0.045), 0.9, 0.275];
+    end
+
     [L, n_ca3, ca3_peak_locations, dt, plateau_duration] = Exp_setup(L, n_ca3);
     
     
-    binned_dx = velocity * dt / 1000;
+    binned_dx = velocity * dt ;
     dx = binned_dx : binned_dx : L; 
     
     
-    %{
-    parameter set for the draft of article
+    %
+    %parameter set for the draft of article
     % tag_1000, current weight 01/10/2022 
     %
-    tau_elig = 1.664103 * 1000  ;           % 1664.103
-    tau_inst = 4.370065E-1 * 1000 + 300;    % 737
-    alpha_pot = 4.150117E-01;               % 0.415
-    beta_pot =  2/(4.541096E-01 +0.1);      % 3.6094
-    alpha_dep = 2.618154E-02;               % 0.02618
-    beta_dep = 2/(9.977173E-02 +0.045);     % 13.8149
-    k_pot = 0.9;
-    k_dep = 0.275;
+    tau_elig = param(1);           % 1664.103
+    tau_inst = param(2);    % 737
+    alpha_pot = param(3);               % 0.415
+    beta_pot =  param(4);      % 3.6094
+    alpha_dep = param(5);               % 0.02618
+    beta_dep = param(6);     % 13.8149
+    k_pot = param(7); % 0.9
+    k_dep = param(8); %0.275
     %}
 
     %{
     % parameter set in the Milstein paper taking the mean of experimental
     % data
-    tau_elig = 863.91;%1500;%863.91 +  113.93;
-    tau_inst = 542.76; %750;%542.76 + 95.47;
-    alpha_pot = 0.24;% + 0.05;
-    beta_pot =  30.32;%10;%30.32 - 6.5;
-    alpha_dep = 0.09;
-    beta_dep = 2260;
+    tau_elig = (863.91 + 113.93) / 1000;%1500;%863.91 +  113.93;
+    tau_inst = (542.76 + 95.47) / 1000; %750;%542.76 + 95.47;
+    alpha_pot = 0.24 + 0.05;% + 0.05;
+    beta_pot =  24;%10;%30.32 - 6.5;
+    alpha_dep = 0.05;
+    beta_dep = 700;
     k_pot = 2.27;
     k_dep = 0.33;
     %}
 
-    %
+    %{
     % parameter set for the single spike case
     tau_elig = 2500;
     tau_inst = 1500;
@@ -151,8 +158,8 @@ function [pot, dep] = pot_dep(overlapping_signal, alpha_pot, beta_pot, alpha_dep
     q_pot = scaled_sigmoid(overlapping_signal, alpha_pot, beta_pot);
     q_dep = scaled_sigmoid(overlapping_signal, alpha_dep, beta_dep);
     
-    pot = trap_sum(q_pot, dt/1000);
-    dep = trap_sum(q_dep, dt/1000);
+    pot = trap_sum(q_pot, dt);
+    dep = trap_sum(q_dep, dt);
     
     function res = trap_sum(input, dt)
         %input has n m size
@@ -201,6 +208,7 @@ the complete FR
         filter_t = filter_t (1:length(filter));
     end
 
+    
     function [local_signal, CA3_FR] = get_local_signal()
         % place field properties
         field_width = 90;
@@ -216,14 +224,16 @@ the complete FR
         gauss_force = peak_rate * exp(-((ext_x - ca3_peak_locations') / gauss_sigma) .^ 2);
         gauss_force = gauss_force / peak_rate;
         
-        % convolve the extent FR with filter
-        conv_signal_aux = ext_convolution(local_filter, gauss_force);
         
         CA3_FR = gauss_force(:, 1:f) + gauss_force(:, f+1 : 2*f) + gauss_force(:, 2*f + 1 : end);
+
+        % convolve the extent FR with filter
+        conv_signal_aux = ext_convolution(local_filter, gauss_force);
         local_signal = conv_signal_aux(:, 1:f) + conv_signal_aux(:, f+1 : 2*f) + conv_signal_aux(:, 2*f + 1 : end);
         local_signal = local_signal / max(local_signal, [], "all");
     end
     
+
     function global_signal = get_global_signal()        
         n = size(inductions, 1);
         L = dx(end);
@@ -255,7 +265,7 @@ the complete FR
                 end
             end
             
-            global_signal_i = conv(global_signal_i_aux, global_filter);
+            global_signal_i = conv(global_filter, global_signal_i_aux);
             if isnan(loc_max)
                 TF = islocalmax(global_signal_i);
                 TF_first_max_ind = find(TF, 1, "first");
