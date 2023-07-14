@@ -1,5 +1,5 @@
 # ignore the folder
-Simulated_Data/
+Simulated_Data/P=0dot3D=0dot3/
 
 # ignore tiff and png file type
 Figures/*.tiff
