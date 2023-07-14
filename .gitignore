@@ -1,2 +1,6 @@
 # ignore the folder
 Simulated_Data/
+
+# ignore tiff and png file type
+*.tiff
+*.png
