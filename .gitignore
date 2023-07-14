@@ -1,6 +1,4 @@
 # ignore the folder
 Simulated_Data/P=0dot3D=0dot3/
-
-# ignore tiff and png file type
-Figures/*.tiff
-Figures/*.png
+Simulated_Data/Cap_N/
+Simulated_Data/N=64/
