@@ -2,5 +2,5 @@
 Simulated_Data/
 
 # ignore tiff and png file type
-*.tiff
-*.png
+Figures/*.tiff
+Figures/*.png
